@@ -66,6 +66,14 @@ export default function BagChart({ selectedYear }) {
           <clipPath id="fill-rise-clip">
             <rect x="0" y={fillY} width={VB_W} height={FILL_BOTTOM - fillY + 10} />
           </clipPath>
+          {/* Flatten logo to single colour #c3e4ef (bg colour) */}
+          <filter id="logo-bg-colour" x="0%" y="0%" width="100%" height="100%" colorInterpolationFilters="sRGB">
+            <feColorMatrix type="matrix"
+              values="0 0 0 0 0.765
+                      0 0 0 0 0.894
+                      0 0 0 0 0.937
+                      0 0 0 1 0" />
+          </filter>
         </defs>
 
         {/* Empty bag — light fill */}
@@ -73,13 +81,13 @@ export default function BagChart({ selectedYear }) {
           {BAG_PATHS.map((d, i) => <path key={i} d={d} />)}
         </g>
 
-        {/* BioMar swoosh watermark — covered by fill as it rises */}
+        {/* BioMar logo — single bg colour watermark, covered by fill as it rises */}
         <image
           href={`${import.meta.env.BASE_URL}biomar-logo-nobox.png`}
-          x={cx - 100} y={120}
-          width={200} height={130}
+          x={cx - 110} y={110}
+          width={220} height={150}
           preserveAspectRatio="xMidYMid meet"
-          opacity="0.2"
+          filter="url(#logo-bg-colour)"
         />
 
         {/* Filled portion — dark blue, rising from bottom, covers the watermark */}
