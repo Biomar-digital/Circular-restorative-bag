@@ -1,5 +1,4 @@
 .bag-chart {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -7,7 +6,8 @@
 }
 
 .bag-chart__svg {
-  width: 100%;
-  max-width: 420px;
-  height: auto;
+  width: auto;
+  height: calc(100vh - 130px);
+  max-height: 620px;
+  max-width: 100%;
 }
