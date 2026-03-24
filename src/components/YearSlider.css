@@ -3,67 +3,63 @@
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  padding: 0 32px 24px;
-  font-family: 'Montserrat', sans-serif;
+  outline: none;
+  user-select: none;
+  font-family: 'Montserrat', system-ui, sans-serif;
 }
 
+/* ── Heading ── */
 .year-slider__heading {
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-
-.year-slider__label {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 1.4px;
-  color: #1A3A8C;
-  text-transform: uppercase;
-}
-
-.year-slider__badge {
-  font-size: 13px;
-  font-weight: 800;
-  color: #1A3A8C;
-  background: rgba(26, 58, 140, 0.08);
-  border-radius: 6px;
-  padding: 2px 8px;
-}
-
-.year-slider__btns {
-  display: flex;
+  justify-content: center;
   gap: 8px;
 }
 
-/* Base button */
-.year-slider__btn {
-  position: relative;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 13px;
+.year-slider__label {
+  font-size: 11px;
   font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
   color: #1A3A8C;
-  background: transparent;
+  opacity: 0.6;
+}
+
+.year-slider__value-badge {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1A3A8C;
+  background: rgba(26, 58, 140, 0.08);
+  padding: 1px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+
+/* ── Pill buttons ── */
+.year-slider__btns {
+  display: flex;
+  gap: 12px;
+}
+
+.year-slider__btn {
+  background: none;
   border: 2px solid rgba(26, 58, 140, 0.28);
   border-radius: 20px;
-  padding: 5px 16px;
-  cursor: pointer;
+  padding: 5px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1A3A8C;
   opacity: 0.65;
-  transition: background 0.15s, color 0.15s, opacity 0.15s;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Montserrat', system-ui, sans-serif;
 }
 
 .year-slider__btn:hover {
+  border-color: #1A3A8C;
   opacity: 1;
-  background: rgba(26, 58, 140, 0.08);
 }
 
-/* Years already passed — light fill, full opacity */
-.year-slider__btn.past {
-  background: rgba(26, 58, 140, 0.12);
-  border-color: rgba(26, 58, 140, 0.5);
-  opacity: 0.85;
-}
-
-/* Selected year — filled dark blue + ::after pulse ring */
 .year-slider__btn.active {
   background: #1A3A8C;
   border-color: #1A3A8C;
@@ -71,69 +67,51 @@
   opacity: 1;
 }
 
-/* Pulse ring via pseudo-element — reliably visible in all browsers */
-.year-slider__btn.active::after {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: 24px;
-  border: 2px solid rgba(26, 58, 140, 0.7);
-  animation: ring-pulse 1.6s ease-out infinite;
-  pointer-events: none;
-}
-
-@keyframes ring-pulse {
-  0%   { opacity: 1;   transform: scale(1);    }
-  80%  { opacity: 0;   transform: scale(1.45); }
-  100% { opacity: 0;   transform: scale(1.45); }
-}
-
-/* ── Range slider ── */
+/* ── Range input ── */
 .year-slider__range {
-  width: 100%;
-  max-width: 320px;
-}
-
-.year-slider__range input[type='range'] {
+  width: 70%;
+  max-width: 340px;
   -webkit-appearance: none;
   appearance: none;
-  width: 100%;
-  height: 6px;
-  border-radius: 3px;
-  background: linear-gradient(
-    to right,
-    #1A3A8C var(--track-fill, 100%),
-    rgba(26, 58, 140, 0.18) var(--track-fill, 100%)
-  );
+  height: 5px;
+  border-radius: 5px;
+  background: linear-gradient(to right, #1A3A8C, #7DC242);
   outline: none;
   cursor: pointer;
 }
 
-.year-slider__range input[type='range']::-webkit-slider-thumb {
+.year-slider__range::-webkit-slider-thumb {
   -webkit-appearance: none;
-  appearance: none;
   width: 22px;
   height: 22px;
   border-radius: 50%;
   background: #fff;
   border: 3px solid #1A3A8C;
-  box-shadow: 0 2px 8px rgba(26, 58, 140, 0.3);
+  box-shadow: 0 2px 8px rgba(26, 58, 140, 0.25);
   cursor: pointer;
-  transition: transform 0.15s, border-color 0.15s;
+  transition: transform 0.15s;
 }
 
-.year-slider__range input[type='range']::-webkit-slider-thumb:hover {
+.year-slider__range::-webkit-slider-thumb:hover {
   transform: scale(1.2);
   border-color: #7DC242;
 }
 
-.year-slider__range input[type='range']::-moz-range-thumb {
+.year-slider__range::-moz-range-thumb {
   width: 22px;
   height: 22px;
   border-radius: 50%;
   background: #fff;
   border: 3px solid #1A3A8C;
-  box-shadow: 0 2px 8px rgba(26, 58, 140, 0.3);
+  box-shadow: 0 2px 8px rgba(26, 58, 140, 0.25);
   cursor: pointer;
-  transition: transform 0.15s, border-color 0.15s;
+}
+
+/* ── Drag hint ── */
+.year-slider__hint {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1A3A8C;
+  opacity: 0.45;
+  letter-spacing: 0.5px;
 }
