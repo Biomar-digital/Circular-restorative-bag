@@ -72,6 +72,14 @@ export default function BagChart({ selectedYear }) {
           <clipPath id="fill-rise-clip">
             <rect x="0" y={fillY} width={VB_W} height={FILL_BOTTOM - fillY + 10} />
           </clipPath>
+          {/* Clip logo to the filled (dark) area only */}
+          <clipPath id="logo-fill-clip">
+            <rect x="0" y={fillY} width={VB_W} height={FILL_BOTTOM - fillY + 10} />
+          </clipPath>
+          {/* Clip logo to the empty (light) area only */}
+          <clipPath id="logo-empty-clip">
+            <rect x="0" y={FILL_TOP} width={VB_W} height={fillY - FILL_TOP} />
+          </clipPath>
         </defs>
 
         {/* Empty bag — light fill */}
@@ -83,6 +91,22 @@ export default function BagChart({ selectedYear }) {
         <g fill="#1f3e77" clipPath="url(#fill-rise-clip)">
           {BAG_PATHS.map((d, i) => <path key={i} d={d} />)}
         </g>
+
+        {/* BioMar logo — black on light area, white on dark fill */}
+        <image
+          href={`${import.meta.env.BASE_URL}biomar-logo-black.png`}
+          x={cx - 90} y={170}
+          width={180} height={60}
+          preserveAspectRatio="xMidYMid meet"
+          clipPath="url(#logo-empty-clip)"
+        />
+        <image
+          href={`${import.meta.env.BASE_URL}biomar-logo-white.png`}
+          x={cx - 90} y={170}
+          width={180} height={60}
+          preserveAspectRatio="xMidYMid meet"
+          clipPath="url(#logo-fill-clip)"
+        />
 
         {/* Target line at 50% */}
         <line
