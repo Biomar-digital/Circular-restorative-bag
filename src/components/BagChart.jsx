@@ -75,7 +75,7 @@ export default function BagChart({ selectedYear }) {
         </defs>
 
         {/* Empty bag — light fill */}
-        <g fill="#d0e8f5">
+        <g fill="#eef7fc">
           {BAG_PATHS.map((d, i) => <path key={i} d={d} />)}
         </g>
 
