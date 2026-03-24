@@ -79,16 +79,7 @@ export default function BagChart({ selectedYear }) {
           {BAG_PATHS.map((d, i) => <path key={i} d={d} />)}
         </g>
 
-        {/* BioMar logo watermark — sits on the empty bag, covered by fill as it rises */}
-        <image
-          href={`${import.meta.env.BASE_URL}biomar-logo-nobox.png`}
-          x={cx - 110} y={110}
-          width={220} height={140}
-          preserveAspectRatio="xMidYMid meet"
-          opacity="0.18"
-        />
-
-        {/* Filled portion — dark blue, rising from bottom, covers the watermark */}
+{/* Filled portion — dark blue, rising from bottom, covers the watermark */}
         <g fill="#1f3e77" clipPath="url(#fill-rise-clip)">
           {BAG_PATHS.map((d, i) => <path key={i} d={d} />)}
         </g>
