@@ -25,30 +25,10 @@ function pctToY(pct) {
   return FILL_BOTTOM - (clamped / 100) * (FILL_BOTTOM - FILL_TOP)
 }
 
-// Build a horizontally-sliding sine-wave fill path
-function buildWavePath(y, offset) {
-  const amp = 7
-  const wl  = 72
-  const x0  = -(wl * 2) + (offset % wl)
-  let d = `M ${x0} ${y}`
-  for (let x = x0; x < VB_W + wl * 2; x += wl) {
-    d += ` Q ${x + wl * 0.25} ${y - amp} ${x + wl * 0.5} ${y}`
-    d += ` Q ${x + wl * 0.75} ${y + amp} ${x + wl} ${y}`
-  }
-  d += ` L ${VB_W + wl} ${FILL_BOTTOM + 20}`
-  d += ` L ${x0} ${FILL_BOTTOM + 20} Z`
-  return d
-}
-
 export default function BagChart({ selectedYear }) {
-  const animRef      = useRef(null)
-  const waveRef      = useRef(null)
-  const waveOffsetRef = useRef(0)
-  const [displayPct,  setDisplayPct]  = useState(DATA[selectedYear].actual)
-  const [waveOffset,  setWaveOffset]  = useState(0)
-  const [isAnimating, setIsAnimating] = useState(false)
+  const animRef = useRef(null)
+  const [displayPct, setDisplayPct] = useState(DATA[selectedYear].actual)
 
-  // Fill level animation — start/stop wave with it
   useEffect(() => {
     if (animRef.current) cancelAnimationFrame(animRef.current)
     const from     = displayPct
@@ -56,36 +36,15 @@ export default function BagChart({ selectedYear }) {
     const start    = performance.now()
     const duration = 700
 
-    setIsAnimating(true)
-
     function animate(now) {
       const t = Math.min((now - start) / duration, 1)
       setDisplayPct(from + (to - from) * easeInOut(t))
-      if (t < 1) {
-        animRef.current = requestAnimationFrame(animate)
-      } else {
-        setIsAnimating(false)
-      }
+      if (t < 1) animRef.current = requestAnimationFrame(animate)
     }
 
     animRef.current = requestAnimationFrame(animate)
     return () => { if (animRef.current) cancelAnimationFrame(animRef.current) }
   }, [selectedYear])
-
-  // Wave oscillation — only while fill is moving
-  useEffect(() => {
-    if (!isAnimating) {
-      if (waveRef.current) cancelAnimationFrame(waveRef.current)
-      return
-    }
-    function tick() {
-      waveOffsetRef.current = (waveOffsetRef.current + 0.5) % 72
-      setWaveOffset(waveOffsetRef.current)
-      waveRef.current = requestAnimationFrame(tick)
-    }
-    waveRef.current = requestAnimationFrame(tick)
-    return () => { if (waveRef.current) cancelAnimationFrame(waveRef.current) }
-  }, [isAnimating])
 
   const fillY   = pctToY((displayPct / TARGET) * 100)
   const targetY = FILL_TOP
@@ -99,7 +58,6 @@ export default function BagChart({ selectedYear }) {
         className="bag-chart__svg"
       >
         <defs>
-          {/* Clip to bag body outline — used for wave fill */}
           <clipPath id="bag-outline-clip">
             <path d={BAG_PATHS[1]} />
           </clipPath>
@@ -136,15 +94,9 @@ export default function BagChart({ selectedYear }) {
           filter="url(#logo-bg-colour)"
         />
 
-        {/* Flat fill underneath — always visible, no wave */}
+        {/* Animated fill — clipped to bag outline */}
         <g clipPath="url(#bag-outline-clip)">
           <rect x="0" y={fillY} width={VB_W} height={FILL_BOTTOM - fillY + 20} fill="#1f3e77" />
-        </g>
-
-        {/* Wave fill — clipped to bag outline, fades out when fill settles */}
-        <g clipPath="url(#bag-outline-clip)"
-           style={{ opacity: isAnimating ? 1 : 0, transition: 'opacity 0.5s ease' }}>
-          <path d={buildWavePath(fillY, waveOffset)} fill="#1f3e77" />
         </g>
 
         {/* Target line at bag rim = 50% goal */}
