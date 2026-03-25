@@ -58,7 +58,7 @@ export default function BagChart({ selectedYear }) {
   return (
     <div className="bag-chart">
       <svg
-        viewBox={`0 0 ${VB_W} ${TOTAL_H}`}
+        viewBox={`0 -70 ${VB_W} ${TOTAL_H + 70}`}
         preserveAspectRatio="xMidYMid meet"
         className="bag-chart__svg"
       >
@@ -76,6 +76,29 @@ export default function BagChart({ selectedYear }) {
                       0 0 0 1 0" />
           </filter>
         </defs>
+
+        {/* Title */}
+        <text
+          x={cx} y={-38}
+          textAnchor="middle"
+          fill="#1f3e77"
+          fontSize="22"
+          fontFamily="Montserrat, sans-serif"
+          fontWeight="800"
+        >
+          Circular &amp; Restorative
+        </text>
+        <text
+          x={cx} y={-14}
+          textAnchor="middle"
+          fill="#1f3e77"
+          fontSize="15"
+          fontFamily="Montserrat, sans-serif"
+          fontWeight="600"
+          opacity="0.7"
+        >
+          50% goal by 2030
+        </text>
 
         {/* Empty bag — light fill */}
         <g fill="#eef7fc">
@@ -103,15 +126,6 @@ export default function BagChart({ selectedYear }) {
           stroke="#1f3e77" strokeWidth="1.5"
           strokeDasharray="5 3" opacity="0.55"
         />
-        <text
-          x={VB_W - 16} y={targetY + 12}
-          fill="#1f3e77" fontSize="13"
-          fontFamily="Montserrat, sans-serif"
-          fontWeight="700" opacity="0.65"
-          textAnchor="end"
-        >
-          50% goal by 2030
-        </text>
 
         {/* Percentage display below bag */}
         <text
