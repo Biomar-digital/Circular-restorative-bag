@@ -50,8 +50,9 @@ export default function BagChart({ selectedYear }) {
     return () => { if (animRef.current) cancelAnimationFrame(animRef.current) }
   }, [selectedYear])
 
-  const fillY = pctToY(displayPct)
-  const targetY = pctToY(TARGET)
+  // Fill represents progress toward the 50% goal — full bag = goal reached
+  const fillY   = pctToY((displayPct / TARGET) * 100)
+  const targetY = FILL_TOP  // 50% goal = top of fillable area
   const cx = VB_W / 2
 
   return (
@@ -95,7 +96,7 @@ export default function BagChart({ selectedYear }) {
           {BAG_PATHS.map((d, i) => <path key={i} d={d} />)}
         </g>
 
-        {/* Target line at 50% */}
+        {/* Target line — at top of bag = 50% goal (full bag) */}
         <line
           x1={18} y1={targetY}
           x2={VB_W - 18} y2={targetY}
@@ -103,13 +104,13 @@ export default function BagChart({ selectedYear }) {
           strokeDasharray="5 3" opacity="0.55"
         />
         <text
-          x={VB_W - 16} y={targetY - 4}
+          x={VB_W - 16} y={targetY + 12}
           fill="#1f3e77" fontSize="9"
           fontFamily="Montserrat, sans-serif"
           fontWeight="700" opacity="0.65"
           textAnchor="end"
         >
-          50% target
+          50% goal by 2030
         </text>
 
         {/* Percentage display below bag */}
