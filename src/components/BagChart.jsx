@@ -136,8 +136,14 @@ export default function BagChart({ selectedYear }) {
           filter="url(#logo-bg-colour)"
         />
 
-        {/* Wave fill — clipped to bag outline */}
+        {/* Flat fill underneath — always visible, no wave */}
         <g clipPath="url(#bag-outline-clip)">
+          <rect x="0" y={fillY} width={VB_W} height={FILL_BOTTOM - fillY + 20} fill="#1f3e77" />
+        </g>
+
+        {/* Wave fill — clipped to bag outline, fades out when fill settles */}
+        <g clipPath="url(#bag-outline-clip)"
+           style={{ opacity: isAnimating ? 1 : 0, transition: 'opacity 0.5s ease' }}>
           <path d={buildWavePath(fillY, waveOffset)} fill="#1f3e77" />
         </g>
 
