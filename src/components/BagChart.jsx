@@ -2,20 +2,17 @@ import { useEffect, useRef, useState } from 'react'
 import './BagChart.css'
 import { DATA, TARGET } from '../data.js'
 
-// Original icon viewBox: 0 0 291.67 400
 const VB_W = 291.67
 const VB_H = 400
-const TOTAL_H = 490 // extra space below for percentage label + title
+const TOTAL_H = 490
 
-// Fillable area of the bag body (below the top seal)
-const FILL_TOP = 33
+const FILL_TOP    = 33
 const FILL_BOTTOM = 395
 
-// Official Biomar feed bag icon — top seal + clean bag outline only (interior branding removed)
 const BAG_PATHS = [
   // Top seal (zigzag/fold pattern)
   'M269.6,11.65c-.7-3.53-2.82-6.35-6.34-7.76-3.52-1.41-6.34-1.41-9.87,0l-14.1,6.35-18.32-9.18c-3.52-1.41-7.05-1.41-10.57,0l-18.32,9.18-18.32-9.18c-3.52-1.41-7.05-1.41-10.57,0l-18.32,9.18L127.24,1.06c-3.52-1.41-7.05-1.41-10.57,0l-18.32,9.18L80.02,1.06c-3.52-1.41-7.05-1.41-10.57,0l-16.91,9.18-14.1-6.35c-2.82-1.41-7.05-1.41-9.87,0-2.82,1.41-5.64,4.24-6.34,7.76-1.41,4.94-2.82,12.71-4.93,21.88h257.24c-2.11-9.18-4.23-16.23-4.93-21.88h0Z',
-  // Bag body outline only (sub-paths with interior branding removed)
+  // Bag body outline only
   'M289.34,381.51l-19.73-25.41c5.64-16.23,16.21-58.59,16.21-151.05,0-51.53-2.82-102.35-8.46-153.17H14.48c-5.64,50.82-8.46,102.35-8.46,153.17,0,89.64,11.28,134.11,16.91,151.05l-20.44,25.41c-2.82,3.53-3.52,9.18-.7,12.71,2.11,4.24,7.05,6.35,11.98,4.94,42.29-11.29,87.39-16.94,132.5-16.94s89.5,5.65,132.5,17.65c4.93.71,9.16-1.41,11.98-4.94,1.41-4.94,1.41-9.88-1.41-13.41h0Z',
 ]
 
@@ -23,21 +20,38 @@ function easeInOut(t) {
   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
 }
 
-// Convert percentage to Y position (fills from bottom up)
 function pctToY(pct) {
   const clamped = Math.max(0, Math.min(100, pct))
   return FILL_BOTTOM - (clamped / 100) * (FILL_BOTTOM - FILL_TOP)
 }
 
+// Build a horizontally-sliding sine-wave fill path
+function buildWavePath(y, offset) {
+  const amp = 7
+  const wl  = 72
+  const x0  = -(wl * 2) + (offset % wl)
+  let d = `M ${x0} ${y}`
+  for (let x = x0; x < VB_W + wl * 2; x += wl) {
+    d += ` Q ${x + wl * 0.25} ${y - amp} ${x + wl * 0.5} ${y}`
+    d += ` Q ${x + wl * 0.75} ${y + amp} ${x + wl} ${y}`
+  }
+  d += ` L ${VB_W + wl} ${FILL_BOTTOM + 20}`
+  d += ` L ${x0} ${FILL_BOTTOM + 20} Z`
+  return d
+}
+
 export default function BagChart({ selectedYear }) {
   const animRef = useRef(null)
+  const waveRef = useRef(null)
   const [displayPct, setDisplayPct] = useState(DATA[selectedYear].actual)
+  const [waveOffset, setWaveOffset] = useState(0)
 
+  // Fill level animation
   useEffect(() => {
     if (animRef.current) cancelAnimationFrame(animRef.current)
     const from = displayPct
-    const to = DATA[selectedYear].actual
-    const start = performance.now()
+    const to   = DATA[selectedYear].actual
+    const start    = performance.now()
     const duration = 700
 
     function animate(now) {
@@ -50,10 +64,21 @@ export default function BagChart({ selectedYear }) {
     return () => { if (animRef.current) cancelAnimationFrame(animRef.current) }
   }, [selectedYear])
 
-  // Fill represents progress toward the 50% goal — full bag = goal reached
+  // Continuous wave oscillation
+  useEffect(() => {
+    let offset = 0
+    function tick() {
+      offset = (offset + 0.5) % 72
+      setWaveOffset(offset)
+      waveRef.current = requestAnimationFrame(tick)
+    }
+    waveRef.current = requestAnimationFrame(tick)
+    return () => { if (waveRef.current) cancelAnimationFrame(waveRef.current) }
+  }, [])
+
   const fillY   = pctToY((displayPct / TARGET) * 100)
-  const targetY = FILL_TOP  // 50% goal = top of fillable area
-  const cx = VB_W / 2
+  const targetY = FILL_TOP
+  const cx      = VB_W / 2
 
   return (
     <div className="bag-chart">
@@ -63,11 +88,11 @@ export default function BagChart({ selectedYear }) {
         className="bag-chart__svg"
       >
         <defs>
-          {/* Clip fill to a rising rectangle */}
-          <clipPath id="fill-rise-clip">
-            <rect x="0" y={fillY} width={VB_W} height={FILL_BOTTOM - fillY + 10} />
+          {/* Clip to bag body outline — used for wave fill */}
+          <clipPath id="bag-outline-clip">
+            <path d={BAG_PATHS[1]} />
           </clipPath>
-          {/* Flatten logo to single colour #c3e4ef (bg colour) */}
+          {/* Flatten logo to single colour #c3e4ef */}
           <filter id="logo-bg-colour" x="0%" y="0%" width="100%" height="100%" colorInterpolationFilters="sRGB">
             <feColorMatrix type="matrix"
               values="0 0 0 0 0.765
@@ -78,25 +103,12 @@ export default function BagChart({ selectedYear }) {
         </defs>
 
         {/* Title */}
-        <text
-          x={cx} y={-38}
-          textAnchor="middle"
-          fill="#1f3e77"
-          fontSize="22"
-          fontFamily="Montserrat, sans-serif"
-          fontWeight="800"
-        >
+        <text x={cx} y={-38} textAnchor="middle" fill="#1f3e77" fontSize="22"
+          fontFamily="Montserrat, sans-serif" fontWeight="800">
           Circular &amp; Restorative
         </text>
-        <text
-          x={cx} y={-14}
-          textAnchor="middle"
-          fill="#1f3e77"
-          fontSize="15"
-          fontFamily="Montserrat, sans-serif"
-          fontWeight="600"
-          opacity="0.7"
-        >
+        <text x={cx} y={-14} textAnchor="middle" fill="#1f3e77" fontSize="15"
+          fontFamily="Montserrat, sans-serif" fontWeight="600" opacity="0.7">
           50% goal by 2030
         </text>
 
@@ -105,50 +117,32 @@ export default function BagChart({ selectedYear }) {
           {BAG_PATHS.map((d, i) => <path key={i} d={d} />)}
         </g>
 
-        {/* BioMar logo — single bg colour watermark, covered by fill as it rises */}
+        {/* BioMar logo watermark */}
         <image
           href={`${import.meta.env.BASE_URL}biomar-logo-nobox.png`}
-          x={cx - 110} y={110}
-          width={220} height={150}
+          x={cx - 110} y={110} width={220} height={150}
           preserveAspectRatio="xMidYMid meet"
           filter="url(#logo-bg-colour)"
         />
 
-        {/* Filled portion — dark blue, rising from bottom, covers the watermark */}
-        <g fill="#1f3e77" clipPath="url(#fill-rise-clip)">
-          {BAG_PATHS.map((d, i) => <path key={i} d={d} />)}
+        {/* Wave fill — clipped to bag outline */}
+        <g clipPath="url(#bag-outline-clip)">
+          <path d={buildWavePath(fillY, waveOffset)} fill="#1f3e77" />
         </g>
 
-        {/* Target line — at top of bag = 50% goal (full bag) */}
-        <line
-          x1={18} y1={targetY}
-          x2={VB_W - 18} y2={targetY}
-          stroke="#1f3e77" strokeWidth="1.5"
-          strokeDasharray="5 3" opacity="0.55"
-        />
+        {/* Target line at bag rim = 50% goal */}
+        <line x1={18} y1={targetY} x2={VB_W - 18} y2={targetY}
+          stroke="#1f3e77" strokeWidth="1.5" strokeDasharray="5 3" opacity="0.55" />
 
-        {/* Percentage display below bag */}
-        <text
-          x={cx} y={VB_H + 42}
-          textAnchor="middle"
-          fill="#1f3e77"
-          fontSize="40"
-          fontFamily="Montserrat, sans-serif"
-          fontWeight="800"
-        >
+        {/* Percentage display */}
+        <text x={cx} y={VB_H + 42} textAnchor="middle" fill="#1f3e77"
+          fontSize="40" fontFamily="Montserrat, sans-serif" fontWeight="800">
           {displayPct.toFixed(1)}%
         </text>
 
         {/* Subtitle */}
-        <text
-          x={cx} y={VB_H + 66}
-          textAnchor="middle"
-          fill="#1f3e77"
-          fontSize="11"
-          fontFamily="Montserrat, sans-serif"
-          fontWeight="600"
-          opacity="0.7"
-        >
+        <text x={cx} y={VB_H + 66} textAnchor="middle" fill="#1f3e77"
+          fontSize="11" fontFamily="Montserrat, sans-serif" fontWeight="600" opacity="0.7">
           Circular &amp; Restorative — {selectedYear}
         </text>
       </svg>
