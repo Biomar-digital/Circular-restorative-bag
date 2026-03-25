@@ -94,7 +94,7 @@ export default function BagChart({ selectedYear }) {
         {/* BioMar logo — single bg colour, always on top of fill */}
         <image
           href={`${import.meta.env.BASE_URL}biomar-logo-nobox.png`}
-          x={cx - 90} y={130} width={180} height={120}
+          x={cx - 120} y={110} width={240} height={160}
           preserveAspectRatio="xMidYMid meet"
           filter="url(#logo-bg-colour)"
         />
