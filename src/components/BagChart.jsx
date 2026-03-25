@@ -61,6 +61,14 @@ export default function BagChart({ selectedYear }) {
           <clipPath id="bag-outline-clip">
             <path d={BAG_PATHS[1]} />
           </clipPath>
+          {/* Flatten logo to single colour #c3e4ef (bg colour) */}
+          <filter id="logo-bg-colour" x="0%" y="0%" width="100%" height="100%" colorInterpolationFilters="sRGB">
+            <feColorMatrix type="matrix"
+              values="0 0 0 0 0.765
+                      0 0 0 0 0.894
+                      0 0 0 0 0.937
+                      0 0 0 1 0" />
+          </filter>
         </defs>
 
         {/* Title */}
@@ -78,17 +86,18 @@ export default function BagChart({ selectedYear }) {
           {BAG_PATHS.map((d, i) => <path key={i} d={d} />)}
         </g>
 
-        {/* BioMar logo — full colour, centred on bag front */}
-        <image
-          href={`${import.meta.env.BASE_URL}biomar-logo-nobox.png`}
-          x={cx - 90} y={130} width={180} height={120}
-          preserveAspectRatio="xMidYMid meet"
-        />
-
         {/* Animated fill — clipped to bag outline */}
         <g clipPath="url(#bag-outline-clip)">
           <rect x="0" y={fillY} width={VB_W} height={FILL_BOTTOM - fillY + 20} fill="#1f3e77" />
         </g>
+
+        {/* BioMar logo — single bg colour, always on top of fill */}
+        <image
+          href={`${import.meta.env.BASE_URL}biomar-logo-nobox.png`}
+          x={cx - 90} y={130} width={180} height={120}
+          preserveAspectRatio="xMidYMid meet"
+          filter="url(#logo-bg-colour)"
+        />
 
         {/* Target line at bag rim = 50% goal */}
         <line x1={18} y1={targetY} x2={VB_W - 18} y2={targetY}
