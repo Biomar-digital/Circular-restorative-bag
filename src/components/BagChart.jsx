@@ -41,40 +41,51 @@ function buildWavePath(y, offset) {
 }
 
 export default function BagChart({ selectedYear }) {
-  const animRef = useRef(null)
-  const waveRef = useRef(null)
-  const [displayPct, setDisplayPct] = useState(DATA[selectedYear].actual)
-  const [waveOffset, setWaveOffset] = useState(0)
+  const animRef      = useRef(null)
+  const waveRef      = useRef(null)
+  const waveOffsetRef = useRef(0)
+  const [displayPct,  setDisplayPct]  = useState(DATA[selectedYear].actual)
+  const [waveOffset,  setWaveOffset]  = useState(0)
+  const [isAnimating, setIsAnimating] = useState(false)
 
-  // Fill level animation
+  // Fill level animation — start/stop wave with it
   useEffect(() => {
     if (animRef.current) cancelAnimationFrame(animRef.current)
-    const from = displayPct
-    const to   = DATA[selectedYear].actual
+    const from     = displayPct
+    const to       = DATA[selectedYear].actual
     const start    = performance.now()
     const duration = 700
+
+    setIsAnimating(true)
 
     function animate(now) {
       const t = Math.min((now - start) / duration, 1)
       setDisplayPct(from + (to - from) * easeInOut(t))
-      if (t < 1) animRef.current = requestAnimationFrame(animate)
+      if (t < 1) {
+        animRef.current = requestAnimationFrame(animate)
+      } else {
+        setIsAnimating(false)
+      }
     }
 
     animRef.current = requestAnimationFrame(animate)
     return () => { if (animRef.current) cancelAnimationFrame(animRef.current) }
   }, [selectedYear])
 
-  // Continuous wave oscillation
+  // Wave oscillation — only while fill is moving
   useEffect(() => {
-    let offset = 0
+    if (!isAnimating) {
+      if (waveRef.current) cancelAnimationFrame(waveRef.current)
+      return
+    }
     function tick() {
-      offset = (offset + 0.5) % 72
-      setWaveOffset(offset)
+      waveOffsetRef.current = (waveOffsetRef.current + 0.5) % 72
+      setWaveOffset(waveOffsetRef.current)
       waveRef.current = requestAnimationFrame(tick)
     }
     waveRef.current = requestAnimationFrame(tick)
     return () => { if (waveRef.current) cancelAnimationFrame(waveRef.current) }
-  }, [])
+  }, [isAnimating])
 
   const fillY   = pctToY((displayPct / TARGET) * 100)
   const targetY = FILL_TOP
@@ -132,7 +143,7 @@ export default function BagChart({ selectedYear }) {
 
         {/* Target line at bag rim = 50% goal */}
         <line x1={18} y1={targetY} x2={VB_W - 18} y2={targetY}
-          stroke="#1f3e77" strokeWidth="1.5" strokeDasharray="5 3" opacity="0.55" />
+          stroke="#1f3e77" strokeWidth="3" strokeDasharray="6 4" opacity="0.55" />
 
         {/* Percentage display */}
         <text x={cx} y={VB_H + 42} textAnchor="middle" fill="#1f3e77"
