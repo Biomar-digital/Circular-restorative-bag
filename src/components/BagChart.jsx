@@ -105,7 +105,7 @@ export default function BagChart({ selectedYear }) {
         />
         <text
           x={VB_W - 16} y={targetY + 12}
-          fill="#1f3e77" fontSize="9"
+          fill="#1f3e77" fontSize="13"
           fontFamily="Montserrat, sans-serif"
           fontWeight="700" opacity="0.65"
           textAnchor="end"
