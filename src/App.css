@@ -23,7 +23,7 @@ body {
 
 .circular-bag-embed {
   width: 100%;
-  aspect-ratio: 600 / 1200;
+  aspect-ratio: 600 / 960;
 }
 
 .circular-bag-embed__svg {
