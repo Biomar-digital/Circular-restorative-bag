@@ -5,7 +5,7 @@ import YearSlider from './components/YearSlider'
 import { YEARS } from './data.js'
 
 const VB_W = 600
-const VB_H = 960
+const VB_H = 800
 
 function App() {
   const [selectedYear, setSelectedYear] = useState(YEARS[YEARS.length - 1])
@@ -21,12 +21,12 @@ function App() {
         >
           <BagChart
             selectedYear={selectedYear}
-            x={100}
-            y={10}
-            width={400}
-            height={768}
+            x={140}
+            y={0}
+            width={320}
+            height={614}
           />
-          <foreignObject x={0} y={790} width={VB_W} height={170}>
+          <foreignObject x={0} y={630} width={VB_W} height={170}>
             <div
               xmlns="http://www.w3.org/1999/xhtml"
               style={{
