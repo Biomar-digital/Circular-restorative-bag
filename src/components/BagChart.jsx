@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import './BagChart.css'
 import { DATA, TARGET } from '../data.js'
 
 const VB_W = 291.67
@@ -25,7 +24,7 @@ function pctToY(pct) {
   return FILL_BOTTOM - (clamped / 100) * (FILL_BOTTOM - FILL_TOP)
 }
 
-export default function BagChart({ selectedYear }) {
+export default function BagChart({ selectedYear, x = 0, y = 0, width, height }) {
   const animRef = useRef(null)
   const [displayPct, setDisplayPct] = useState(DATA[selectedYear].actual)
 
@@ -51,70 +50,71 @@ export default function BagChart({ selectedYear }) {
   const cx      = VB_W / 2
 
   return (
-    <div className="bag-chart">
-      <svg
-        viewBox={`0 -70 ${VB_W} ${TOTAL_H + 70}`}
+    <svg
+      x={x}
+      y={y}
+      width={width}
+      height={height}
+      viewBox={`0 -70 ${VB_W} ${TOTAL_H + 70}`}
+      preserveAspectRatio="xMidYMid meet"
+    >
+      <defs>
+        <clipPath id="bag-outline-clip">
+          <path d={BAG_PATHS[1]} />
+        </clipPath>
+        {/* Flatten logo to single colour #c3e4ef (legacy bg colour kept so logo punches through navy fill) */}
+        <filter id="logo-bg-colour" x="0%" y="0%" width="100%" height="100%" colorInterpolationFilters="sRGB">
+          <feColorMatrix type="matrix"
+            values="0 0 0 0 0.765
+                    0 0 0 0 0.894
+                    0 0 0 0 0.937
+                    0 0 0 1 0" />
+        </filter>
+      </defs>
+
+      {/* Title */}
+      <text x={cx} y={-38} textAnchor="middle" fill="#1f3e77" fontSize="22"
+        fontFamily="Montserrat, sans-serif" fontWeight="800">
+        Circular &amp; Restorative
+      </text>
+      <text x={cx} y={-14} textAnchor="middle" fill="#1f3e77" fontSize="15"
+        fontFamily="Montserrat, sans-serif" fontWeight="600" opacity="0.7">
+        50% goal by 2030
+      </text>
+
+      {/* Empty bag — light fill */}
+      <g fill="#eef7fc">
+        {BAG_PATHS.map((d, i) => <path key={i} d={d} />)}
+      </g>
+
+      {/* Animated fill — clipped to bag outline */}
+      <g clipPath="url(#bag-outline-clip)">
+        <rect x="0" y={fillY} width={VB_W} height={FILL_BOTTOM - fillY + 20} fill="#1f3e77" />
+      </g>
+
+      {/* BioMar logo — single bg colour, always on top of fill */}
+      <image
+        href={`${import.meta.env.BASE_URL}biomar-logo-nobox.png`}
+        x={cx - 120} y={110} width={240} height={160}
         preserveAspectRatio="xMidYMid meet"
-        className="bag-chart__svg"
-      >
-        <defs>
-          <clipPath id="bag-outline-clip">
-            <path d={BAG_PATHS[1]} />
-          </clipPath>
-          {/* Flatten logo to single colour #c3e4ef (bg colour) */}
-          <filter id="logo-bg-colour" x="0%" y="0%" width="100%" height="100%" colorInterpolationFilters="sRGB">
-            <feColorMatrix type="matrix"
-              values="0 0 0 0 0.765
-                      0 0 0 0 0.894
-                      0 0 0 0 0.937
-                      0 0 0 1 0" />
-          </filter>
-        </defs>
+        filter="url(#logo-bg-colour)"
+      />
 
-        {/* Title */}
-        <text x={cx} y={-38} textAnchor="middle" fill="#1f3e77" fontSize="22"
-          fontFamily="Montserrat, sans-serif" fontWeight="800">
-          Circular &amp; Restorative
-        </text>
-        <text x={cx} y={-14} textAnchor="middle" fill="#1f3e77" fontSize="15"
-          fontFamily="Montserrat, sans-serif" fontWeight="600" opacity="0.7">
-          50% goal by 2030
-        </text>
+      {/* Target line at bag rim = 50% goal */}
+      <line x1={18} y1={targetY} x2={VB_W - 18} y2={targetY}
+        stroke="#1f3e77" strokeWidth="3" strokeDasharray="6 4" opacity="0.55" />
 
-        {/* Empty bag — light fill */}
-        <g fill="#eef7fc">
-          {BAG_PATHS.map((d, i) => <path key={i} d={d} />)}
-        </g>
+      {/* Percentage display */}
+      <text x={cx} y={VB_H + 42} textAnchor="middle" fill="#1f3e77"
+        fontSize="40" fontFamily="Montserrat, sans-serif" fontWeight="800">
+        {displayPct.toFixed(1)}%
+      </text>
 
-        {/* Animated fill — clipped to bag outline */}
-        <g clipPath="url(#bag-outline-clip)">
-          <rect x="0" y={fillY} width={VB_W} height={FILL_BOTTOM - fillY + 20} fill="#1f3e77" />
-        </g>
-
-        {/* BioMar logo — single bg colour, always on top of fill */}
-        <image
-          href={`${import.meta.env.BASE_URL}biomar-logo-nobox.png`}
-          x={cx - 120} y={110} width={240} height={160}
-          preserveAspectRatio="xMidYMid meet"
-          filter="url(#logo-bg-colour)"
-        />
-
-        {/* Target line at bag rim = 50% goal */}
-        <line x1={18} y1={targetY} x2={VB_W - 18} y2={targetY}
-          stroke="#1f3e77" strokeWidth="3" strokeDasharray="6 4" opacity="0.55" />
-
-        {/* Percentage display */}
-        <text x={cx} y={VB_H + 42} textAnchor="middle" fill="#1f3e77"
-          fontSize="40" fontFamily="Montserrat, sans-serif" fontWeight="800">
-          {displayPct.toFixed(1)}%
-        </text>
-
-        {/* Subtitle */}
-        <text x={cx} y={VB_H + 66} textAnchor="middle" fill="#1f3e77"
-          fontSize="11" fontFamily="Montserrat, sans-serif" fontWeight="600" opacity="0.7">
-          Circular &amp; Restorative — {selectedYear}
-        </text>
-      </svg>
-    </div>
+      {/* Subtitle */}
+      <text x={cx} y={VB_H + 66} textAnchor="middle" fill="#1f3e77"
+        fontSize="11" fontFamily="Montserrat, sans-serif" fontWeight="600" opacity="0.7">
+        Circular &amp; Restorative — {selectedYear}
+      </text>
+    </svg>
   )
 }

@@ -11,5 +11,16 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      (function () {
+        if (window.parent === window) return
+        function post() {
+          var h = document.documentElement.scrollHeight
+          window.parent.postMessage({ type: 'circular-bag-height', height: h }, '*')
+        }
+        window.addEventListener('load', post)
+        new ResizeObserver(post).observe(document.documentElement)
+      })()
+    </script>
   </body>
 </html>
